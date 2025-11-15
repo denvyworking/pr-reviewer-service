@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Наш Go сервис
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgres://user:password@postgres:5432/pr_reviewer?sslmode=disable
+    command: >
+      sh -c "
+        sleep 5 &&
+        /server
+      "
+
+  # База данных PostgreSQL
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=pr_reviewer
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/migrations
+      - ./scripts:/scripts
+    command: >
+      sh -c "
+        docker-entrypoint.sh postgres &
+        sleep 5 &&
+        psql -h localhost -U user -d pr_reviewer -f /migrations/001_init.sql &&
+        wait
+      "
+
+volumes:
+  postgres_data:
