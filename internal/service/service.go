@@ -186,7 +186,7 @@ func (s *Service) ReassignReviewer(ctx context.Context, prID, oldUserID string) 
 		return nil, "", ErrNoCandidate
 	}
 
-	newReviewers := s.replaceReviewer(pr.AssignedReviewers, oldUserID, newReviewerID)
+	newReviewers := s.replaceReviewer(pr.AssignedReviewers, oldUserID, newReviewerID) // используем метод структуры models.PullRequest
 
 	err = s.repo.UpdatePRReviewers(ctx, prID, newReviewers)
 	if err != nil {
